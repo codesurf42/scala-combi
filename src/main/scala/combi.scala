@@ -3,37 +3,26 @@ import scalaz.Memo
 object Count {
   def main(args: Array[String]) {
 
-    val n = 5
-    val r = 10
     lazy val limit = BigInt(10).pow(6)
 
-    // purely computational
-    val val1 = (1 to 100)
-      .map{ selectionsPure(_, r) }
-      .filter(_ > limit)
-      .size
+    // conditions:
+    // n <- 1 to 100
+    // r <= n
 
-    // memoized, faster
-    val val2 = (1 to 100)
-      .map{ selectionsMem(_, r) }
-      .filter(_ > limit)
-      .size
+    val vals = for {
+      n <- 1 to 100
+      r <- 1 to n
+    } yield selectionsMem(n, r)
 
-    // too small to be faster
-    val val3 = (1 to 100)
-      .par.map{ selectionsMem(_, r) }
-      .filter(_ > limit)
-      .size
-
-    println(s"There are $val1 ($val2, $val3) selections greater than $limit")
-
+    println("All vals: " + vals.size)
+    println("Above limit: " + vals.filter{ _ > limit}.size)
   }
 
   def selectionsPure(n: BigInt, r: BigInt): BigInt = {
     factorial(n) / ( factorial(r) * factorial(n -r))
   }
 
-  def selectionsMem(n: BigInt, r: BigInt): BigInt = {
+  def selectionsMem(n: Int, r: Int): BigInt = {
     memoFact(n) / ( memoFact(r) * memoFact(n -r))
   }
 
